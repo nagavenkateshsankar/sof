@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            max-width: 750px;
+            width: 100%;
+            max-height: 95vh;
+            overflow: hidden;
+            transition: all 0.5s ease;
+            position: relative;
+        }
+
+        .quiz-container.expanded {
+            max-width: 1400px;
+            padding: 20px;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 30px;
+        }
+
+        .quiz-title {
+            color: #333;
+            font-size: 36px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .timer-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        .timer {
+            background: #667eea;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            min-width: 80px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .timer.warning {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .timer.danger {
+            background: #dc3545;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        .timer.next-question {
+            background: #17a2b8;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .content-wrapper {
+            display: flex;
+            gap: 25px;
+            transition: all 0.5s ease;
+            justify-content: center;
+        }
+
+        .question-section {
+            flex: 1;
+            max-width: 100%;
+            transition: all 0.5s ease;
+        }
+
+        .explanation-section {
+            flex: 0;
+            width: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .content-wrapper.show-explanation .question-section {
+            flex: 0 0 48%;
+        }
+
+        .content-wrapper.show-explanation .explanation-section {
+            flex: 0 0 48%;
+            opacity: 1;
+            width: auto;
+        }
+
+        .explanation-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 18px;
+            border-left: 4px solid #667eea;
+        }
+
+        .explanation-title {
+            color: #667eea;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .explanation-icon {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .explanation-text {
+            color: #555;
+            line-height: 1.4;
+            margin-bottom: 12px;
+            font-size: 22px;
+        }
+
+
+        .fun-fact {
+            background: #fff3cd;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+        .fun-fact-label {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+        }
+
+        .fun-fact-text {
+            color: #856404;
+            line-height: 1.4;
+            font-size: 18px;
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+        }
+
+        .question-counter {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: #6c757d;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .question-text {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+        }
+
+        .option:hover:not(.disabled) {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: #cfe2ff;
+            border-color: #6ea8fe;
+        }
+
+        .option.correct {
+            background: #d1e7dd;
+            border-color: #0f5132;
+            animation: correctPulse 0.5s ease;
+        }
+
+        .option.correct.highlight {
+            animation: correctHighlight 1s infinite;
+        }
+
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #842029;
+            animation: shake 0.5s ease;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes correctHighlight {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .option-letter {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .option.correct .option-letter {
+            background: #0f5132;
+        }
+
+        .option.incorrect .option-letter {
+            background: #842029;
+        }
+
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 6px;
+            border-radius: 3px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: #667eea;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .result-container {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .result-container.show {
+            display: block;
+        }
+
+        .score {
+            font-size: 64px;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .result-message {
+            font-size: 30px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1 class="quiz-title">Knowledge Quiz</h1>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+        </div>
+
+        <div class="timer-container">
+            <div class="timer" id="timer">15</div>
+        </div>
+
+        <div class="question-counter" id="questionCounter">1/5</div>
+
+        <div id="quizContent">
+            <div class="content-wrapper" id="contentWrapper">
+                <div class="question-section">
+                    <div class="question-container">
+                        <h2 class="question-text" id="questionText">Loading question...</h2>
+
+                        <div class="options-container" id="optionsContainer">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="explanation-section" id="explanationSection">
+                    <div class="explanation-card">
+                        <div class="explanation-title">
+                            <div class="explanation-icon">💡</div>
+                            <span>Explanation</span>
+                        </div>
+
+
+                        <div class="explanation-text" id="explanationText"></div>
+
+                        <div class="fun-fact" id="funFact">
+                            <div class="fun-fact-label">
+                                <span>💫</span>
+                                <span>Did you know?</span>
+                            </div>
+                            <div class="fun-fact-text" id="funFactText"></div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="result-container" id="resultContainer">
+            <div class="score" id="score">0/5</div>
+            <div class="result-message" id="resultMessage">Quiz Completed!</div>
+            <button class="btn btn-primary" onclick="restartQuiz()">Restart Quiz</button>
+        </div>
+    </div>
+
+
+    <script>
+        const quizData = [
+            {
+                question: "What is the capital of France?",
+                options: ["London", "Berlin", "Paris", "Madrid"],
+                correct: 2,
+                timeLimit: 15,
+                explanation: "Paris has been the capital of France since 987 AD when Hugh Capet, Count of Paris, was elected King of France. The city is not only the political capital but also the cultural and economic heart of France.",
+                funFact: "Paris is known as 'The City of Light' (La Ville Lumière) because it was one of the first cities to have street lighting in the 1860s and for being the center of the Enlightenment."
+            },
+            {
+                question: "Which planet is known as the Red Planet?",
+                options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                correct: 1,
+                timeLimit: 15,
+                explanation: "Mars appears red due to iron oxide (rust) on its surface. The reddish appearance is visible from Earth with the naked eye, which is why ancient civilizations named it after their gods of war.",
+                funFact: "A day on Mars is almost exactly the same length as a day on Earth - 24 hours and 37 minutes. However, a year on Mars is almost twice as long as Earth's, lasting 687 Earth days!"
+            },
+            {
+                question: "What is the largest ocean on Earth?",
+                options: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
+                correct: 3,
+                timeLimit: 15,
+                explanation: "The Pacific Ocean covers about 63 million square miles and contains more than half of the free water on Earth. It's larger than all of Earth's land area combined.",
+                funFact: "The Pacific Ocean is home to the Mariana Trench, the deepest point on Earth at nearly 36,000 feet deep. Mount Everest could fit inside it with over a mile to spare!"
+            },
+            {
+                question: "Who painted the Mona Lisa?",
+                options: ["Vincent van Gogh", "Pablo Picasso", "Leonardo da Vinci", "Michelangelo"],
+                correct: 2,
+                timeLimit: 15,
+                explanation: "Leonardo da Vinci painted the Mona Lisa between 1503 and 1519. It's considered one of the most valuable paintings in existence and is housed in the Louvre Museum in Paris.",
+                funFact: "The Mona Lisa has no visible eyebrows or eyelashes. This was actually a fashion trend among Italian women during the Renaissance period, who would pluck all their facial hair!"
+            },
+            {
+                question: "What is the smallest country in the world?",
+                options: ["Monaco", "Vatican City", "San Marino", "Liechtenstein"],
+                correct: 1,
+                timeLimit: 15,
+                explanation: "Vatican City is the smallest country in the world at just 0.17 square miles (0.44 square kilometers). It's an enclave within Rome, Italy, and serves as the spiritual and administrative headquarters of the Roman Catholic Church.",
+                funFact: "Vatican City has its own postal service and issues its own stamps. These stamps are highly sought after by collectors and are only valid within Vatican City!"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = [];
+        let timer;
+        let timeLeft;
+        let questionAnswered = false;
+        let autoAdvanceTimer;
+        let nextQuestionTimer;
+
+        // Web Audio API for better sound generation
+        let audioContext;
+        let audioEnabled = false;
+
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioEnabled = true;
+                console.log('Audio initialized successfully');
+            } catch (e) {
+                console.log('Web Audio API not supported:', e);
+                audioEnabled = false;
+            }
+        }
+
+        function playTick() {
+            if (!audioEnabled || !audioContext) return;
+
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (e) {
+                console.log('Tick sound failed:', e);
+            }
+        }
+
+        function playAchievement() {
+            if (!audioEnabled || !audioContext) return;
+
+            try {
+                const oscillator1 = audioContext.createOscillator();
+                const oscillator2 = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator1.connect(gainNode);
+                oscillator2.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Create a pleasant chord (C major)
+                oscillator1.frequency.setValueAtTime(523, audioContext.currentTime); // C5
+                oscillator2.frequency.setValueAtTime(659, audioContext.currentTime); // E5
+
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                oscillator1.start(audioContext.currentTime);
+                oscillator2.start(audioContext.currentTime);
+                oscillator1.stop(audioContext.currentTime + 0.5);
+                oscillator2.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log('Achievement sound failed:', e);
+            }
+        }
+
+        function enableAudio() {
+            if (!audioEnabled) {
+                initAudio();
+            }
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    console.log('Audio context resumed successfully');
+                    audioEnabled = true;
+                }).catch(e => {
+                    console.log('Audio resume failed:', e);
+                });
+            }
+        }
+
+        // Add event listeners to enable audio on any user interaction
+        document.addEventListener('click', enableAudio, { once: true });
+        document.addEventListener('keydown', enableAudio, { once: true });
+        document.addEventListener('touchstart', enableAudio, { once: true });
+
+        function initQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            userAnswers = [];
+            document.getElementById('quizContent').style.display = 'block';
+            document.getElementById('resultContainer').classList.remove('show');
+
+            // Initialize audio context immediately and try to enable
+            initAudio();
+
+            // For newer browsers, try to start audio context immediately
+            if (audioContext) {
+                if (audioContext.state === 'running') {
+                    audioEnabled = true;
+                    console.log('Audio enabled automatically');
+                } else {
+                    // Attempt to resume if suspended
+                    audioContext.resume().then(() => {
+                        audioEnabled = true;
+                        console.log('Audio resumed automatically');
+                    }).catch(() => {
+                        console.log('Auto audio enable failed - user interaction required');
+                        audioEnabled = false;
+                    });
+                }
+            }
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const question = quizData[currentQuestion];
+            questionAnswered = false;
+
+            // Clear any existing timers
+            clearTimeout(autoAdvanceTimer);
+            clearInterval(nextQuestionTimer);
+
+            document.getElementById('questionCounter').textContent = `${currentQuestion + 1}/${quizData.length}`;
+            document.getElementById('questionText').textContent = question.question;
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.innerHTML = `
+                    <span class="option-letter">${String.fromCharCode(65 + index)}</span>
+                    <span>${option}</span>
+                `;
+                optionElement.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionElement);
+            });
+
+            // Remove any existing highlight animations
+            document.querySelectorAll('.option.highlight').forEach(option => {
+                option.classList.remove('highlight');
+            });
+
+            // Reset layout
+            document.getElementById('contentWrapper').classList.remove('show-explanation');
+            document.querySelector('.quiz-container').classList.remove('expanded');
+
+            updateProgress();
+            startTimer();
+        }
+
+        function selectOption(index) {
+            if (questionAnswered) return;
+
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => option.classList.remove('selected'));
+            options[index].classList.add('selected');
+
+            userAnswers[currentQuestion] = index;
+        }
+
+        function startTimer() {
+            clearInterval(timer);
+            timeLeft = quizData[currentQuestion].timeLimit;
+
+            // Reset timer style for question phase
+            const timerElement = document.getElementById('timer');
+            timerElement.classList.remove('next-question');
+
+            updateTimerDisplay();
+
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = timeLeft;
+
+            // Play tick sound for each second
+            if (timeLeft > 0) {
+                playTick();
+            }
+
+            timerElement.classList.remove('warning', 'danger');
+            if (timeLeft <= 10 && timeLeft > 5) {
+                timerElement.classList.add('warning');
+            } else if (timeLeft <= 5) {
+                timerElement.classList.add('danger');
+            }
+        }
+
+        function handleTimeout() {
+            questionAnswered = true;
+            const question = quizData[currentQuestion];
+            const correctIndex = question.correct;
+            const options = document.querySelectorAll('.option');
+
+            options.forEach((option, index) => {
+                option.classList.add('disabled');
+                if (index === correctIndex) {
+                    option.classList.add('correct');
+                    // Add highlight animation after a brief delay to let the initial animation finish
+                    setTimeout(() => {
+                        option.classList.add('highlight');
+                    }, 600);
+                } else if (userAnswers[currentQuestion] === index) {
+                    option.classList.add('incorrect');
+                }
+            });
+
+            // Play achievement sound when answer is revealed
+            setTimeout(() => {
+                playAchievement();
+            }, 300);
+
+            // Expand container and show explanation
+            const container = document.querySelector('.quiz-container');
+            container.classList.add('expanded');
+            document.getElementById('contentWrapper').classList.add('show-explanation');
+
+            // Fill in explanation content
+            document.getElementById('explanationText').textContent = question.explanation;
+            document.getElementById('funFactText').textContent = question.funFact;
+
+            if (userAnswers[currentQuestion] === correctIndex) {
+                score++;
+            }
+
+            // Start next question countdown in corner timer
+            startNextQuestionCountdown();
+        }
+
+
+        function startNextQuestionCountdown() {
+            let nextQuestionTime = 10;
+            const timerElement = document.getElementById('timer');
+
+            // Change timer style for next question phase
+            timerElement.classList.remove('warning', 'danger');
+            timerElement.classList.add('next-question');
+            timerElement.textContent = nextQuestionTime;
+
+            nextQuestionTimer = setInterval(() => {
+                nextQuestionTime--;
+                timerElement.textContent = nextQuestionTime;
+
+                if (nextQuestionTime <= 0) {
+                    clearInterval(nextQuestionTimer);
+                    if (currentQuestion < quizData.length - 1) {
+                        currentQuestion++;
+                        loadQuestion();
+                    } else {
+                        showResults();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / quizData.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showResults() {
+            clearInterval(timer);
+            document.getElementById('quizContent').style.display = 'none';
+            document.getElementById('resultContainer').classList.add('show');
+
+            document.getElementById('score').textContent = `${score}/${quizData.length}`;
+
+            let message = '';
+            const percentage = (score / quizData.length) * 100;
+            if (percentage === 100) {
+                message = 'Perfect! You got all answers correct! 🎉';
+            } else if (percentage >= 80) {
+                message = 'Excellent work! 🌟';
+            } else if (percentage >= 60) {
+                message = 'Good job! Keep practicing! 👍';
+            } else if (percentage >= 40) {
+                message = 'Not bad! Room for improvement. 📚';
+            } else {
+                message = 'Keep studying! You can do better! 💪';
+            }
+
+            document.getElementById('resultMessage').textContent = message;
+        }
+
+        function restartQuiz() {
+            initQuiz();
+        }
+
+        initQuiz();
+    </script>
+</body>
+</html>
