@@ -366,25 +366,23 @@
 
         .result-container {
             text-align: center;
-            padding: 20px;
+            padding: 40px;
             display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
         }
 
         .result-container.show {
-            display: block;
+            display: flex;
         }
 
-        .score {
-            font-size: 64px;
+        .thank-you-message {
+            font-size: 48px;
             color: #667eea;
             font-weight: bold;
-            margin-bottom: 25px;
-        }
-
-        .result-message {
-            font-size: 30px;
-            color: #333;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
     </style>
@@ -440,9 +438,7 @@
         </div>
 
         <div class="result-container" id="resultContainer">
-            <div class="score" id="score">0/5</div>
-            <div class="result-message" id="resultMessage">Quiz Completed!</div>
-            <button class="btn btn-primary" onclick="restartQuiz()">Restart Quiz</button>
+            <div class="thank-you-message">Thank you</div>
         </div>
     </div>
 
@@ -787,29 +783,8 @@
             clearInterval(nextQuestionTimer);
             document.getElementById('quizContent').style.display = 'none';
             document.getElementById('resultContainer').classList.add('show');
-
-            document.getElementById('score').textContent = `${score}/${quizData.length}`;
-
-            let message = '';
-            const percentage = (score / quizData.length) * 100;
-            if (percentage === 100) {
-                message = 'Perfect! You got all answers correct! 🎉';
-            } else if (percentage >= 80) {
-                message = 'Excellent work! 🌟';
-            } else if (percentage >= 60) {
-                message = 'Good job! Keep practicing! 👍';
-            } else if (percentage >= 40) {
-                message = 'Not bad! Room for improvement. 📚';
-            } else {
-                message = 'Keep studying! You can do better! 💪';
-            }
-
-            document.getElementById('resultMessage').textContent = message;
         }
 
-        function restartQuiz() {
-            initQuiz();
-        }
 
         initQuiz();
     </script>
