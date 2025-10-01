@@ -21,8 +21,8 @@ module.exports = defineConfig({
     },
   ],
   webServer: {
-    command: 'python3 -m http.server 8080',
-    port: 8080,
+    command: 'python3 -m http.server 9090',
+    port: 9090,
     reuseExistingServer: !process.env.CI,
   },
 });

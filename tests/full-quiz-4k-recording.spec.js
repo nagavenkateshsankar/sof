@@ -6,7 +6,7 @@ test.describe('Full Quiz 4K Recording', () => {
     await page.setViewportSize({ width: 3840, height: 2160 });
 
     // Navigate to quiz page
-    await page.goto('http://localhost:8080/src/quiz.html');
+    await page.goto('http://localhost:9090/src/quiz.html');
 
     // Wait for quiz to load
     await page.waitForLoadState('networkidle');

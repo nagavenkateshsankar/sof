@@ -15,7 +15,7 @@ test.describe('Responsive Design Tests', () => {
       await page.setViewportSize({ width, height });
 
       // Navigate to quiz
-      await page.goto('http://localhost:8080/src/quiz.html');
+      await page.goto('http://localhost:9090/src/quiz.html');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(1000);
 
@@ -80,7 +80,7 @@ test.describe('Responsive Design Tests', () => {
 
   test('Quiz elements should not overlap at any resolution', async ({ page }) => {
     await page.setViewportSize({ width: 3840, height: 2160 });
-    await page.goto('http://localhost:8080/src/quiz.html');
+    await page.goto('http://localhost:9090/src/quiz.html');
     await page.waitForLoadState('networkidle');
 
     // Check for overlapping elements
@@ -92,10 +92,10 @@ test.describe('Responsive Design Tests', () => {
     const counterBox = await questionCounter.boundingBox();
     const titleBox = await title.boundingBox();
 
-    // Timer and counter should not overlap
-    const timerRight = timerBox.x + timerBox.width;
-    const counterLeft = counterBox.x;
-    expect(timerRight).toBeLessThan(counterLeft + 50); // Some tolerance
+    // Timer (right side) and counter (left side) should not overlap
+    const timerLeft = timerBox.x;
+    const counterRight = counterBox.x + counterBox.width;
+    expect(counterRight).toBeLessThan(timerLeft - 50); // Counter should be well left of timer
 
     // Elements should not overlap with title
     const titleBottom = titleBox.y + titleBox.height;
