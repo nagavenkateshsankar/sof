@@ -1,0 +1,13 @@
+{
+  "name": "interactive-quiz-app",
+  "version": "1.0.0",
+  "description": "Interactive Quiz Application with timer-based questions and audio feedback",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  }
+}
