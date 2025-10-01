@@ -386,60 +386,10 @@
             margin-bottom: 20px;
         }
 
-        .intro-video-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: black;
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .intro-video-container.hidden {
-            display: none;
-        }
-
-        .intro-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .skip-intro {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            background: rgba(255, 255, 255, 0.8);
-            color: #333;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .skip-intro:hover {
-            background: rgba(255, 255, 255, 0.9);
-        }
 
     </style>
 </head>
 <body>
-    <!-- Intro Video Container -->
-    <div class="intro-video-container" id="introVideoContainer">
-        <video class="intro-video" id="introVideo" muted autoplay>
-            <source src="../media/Lightning quiz - intro.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-        <button class="skip-intro" id="skipIntro">Skip Intro</button>
-    </div>
-
     <div class="quiz-container">
         <div class="quiz-header">
             <h1 class="quiz-title">Grade 3 - General Knowledge Quiz</h1>
@@ -745,42 +695,6 @@
         document.addEventListener('keydown', enableAudio, { once: true });
         document.addEventListener('touchstart', enableAudio, { once: true });
 
-        function playIntroVideo() {
-            const introContainer = document.getElementById('introVideoContainer');
-            const introVideo = document.getElementById('introVideo');
-            const skipButton = document.getElementById('skipIntro');
-
-            // Show intro video container
-            introContainer.classList.remove('hidden');
-
-            // Handle video end
-            introVideo.addEventListener('ended', () => {
-                hideIntroAndStartQuiz();
-            });
-
-            // Handle skip button
-            skipButton.addEventListener('click', () => {
-                hideIntroAndStartQuiz();
-            });
-
-            // Handle video error
-            introVideo.addEventListener('error', (e) => {
-                console.log('Video error:', e);
-                hideIntroAndStartQuiz();
-            });
-
-            // Try to play the video
-            introVideo.play().catch((e) => {
-                console.log('Video autoplay failed:', e);
-                // Video still shows, user can click play or skip
-            });
-        }
-
-        function hideIntroAndStartQuiz() {
-            const introContainer = document.getElementById('introVideoContainer');
-            introContainer.classList.add('hidden');
-            initQuiz();
-        }
 
         function initQuiz() {
             currentQuestion = 0;
@@ -1014,8 +928,7 @@
         }
 
 
-        // Start with intro video
-        playIntroVideo();
+        initQuiz();
     </script>
 </body>
 </html>
