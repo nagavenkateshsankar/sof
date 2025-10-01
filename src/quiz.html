@@ -241,6 +241,8 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            overflow: visible;
+            padding: 0 5px;
         }
 
         .option {
@@ -254,6 +256,8 @@
             align-items: center;
             gap: 12px;
             font-size: 20px;
+            position: relative;
+            margin: 0 5px;
         }
 
         .option:hover:not(.disabled) {
@@ -270,10 +274,13 @@
             background: #d1e7dd;
             border-color: #0f5132;
             animation: correctPulse 0.5s ease;
+            transform-origin: center center;
         }
 
         .option.correct.highlight {
             animation: correctHighlight 1s infinite;
+            transform-origin: center center;
+            z-index: 10;
         }
 
         .option.incorrect {
@@ -294,9 +301,18 @@
         }
 
         @keyframes correctHighlight {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(15, 81, 50, 0.4);
+            }
+            50% {
+                transform: scale(1.03);
+                box-shadow: 0 0 15px 5px rgba(15, 81, 50, 0.2);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(15, 81, 50, 0);
+            }
         }
 
         @keyframes shake {
