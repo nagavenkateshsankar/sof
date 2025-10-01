@@ -2,7 +2,7 @@
 const { defineConfig, devices } = require('@playwright/test');
 
 module.exports = defineConfig({
-  testDir: './tests',
+  testDir: '../tests',
   testMatch: '**/full-quiz-4k-recording.spec.js', // Only run the 4K recording test
   fullyParallel: false,
   forbidOnly: false,
