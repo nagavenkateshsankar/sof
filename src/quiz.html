@@ -552,7 +552,7 @@
             currentQuestion = 0;
             score = 0;
             userAnswers = [];
-            document.getElementById('quizContent').style.display = 'block';
+            document.getElementById('quizContent').style.display = 'flex';
             document.getElementById('resultContainer').classList.remove('show');
 
             // Initialize audio context immediately and try to enable
@@ -738,6 +738,7 @@
 
         function showResults() {
             clearInterval(timer);
+            clearInterval(nextQuestionTimer);
             document.getElementById('quizContent').style.display = 'none';
             document.getElementById('resultContainer').classList.add('show');
 
