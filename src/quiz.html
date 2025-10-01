@@ -500,8 +500,6 @@
         // Web Audio API for better sound generation
         let audioContext;
         let audioEnabled = false;
-        let backgroundMusicGain;
-        let backgroundMusicOscillator;
 
         function initAudio() {
             try {
@@ -535,110 +533,6 @@
             }
         }
 
-        function startBackgroundMusic() {
-            if (!audioEnabled || !audioContext) return;
-
-            try {
-                // Stop existing background music if any
-                stopBackgroundMusic();
-
-                // Create multiple oscillators for a richer harmony
-                const oscillators = [];
-                const gains = [];
-
-                // Main melody line
-                const melodyOsc = audioContext.createOscillator();
-                const melodyGain = audioContext.createGain();
-                melodyOsc.connect(melodyGain);
-                melodyGain.connect(audioContext.destination);
-                melodyOsc.type = 'triangle';
-                melodyGain.gain.setValueAtTime(0.08, audioContext.currentTime);
-                oscillators.push(melodyOsc);
-                gains.push(melodyGain);
-
-                // Bass line
-                const bassOsc = audioContext.createOscillator();
-                const bassGain = audioContext.createGain();
-                bassOsc.connect(bassGain);
-                bassGain.connect(audioContext.destination);
-                bassOsc.type = 'sine';
-                bassGain.gain.setValueAtTime(0.05, audioContext.currentTime);
-                oscillators.push(bassOsc);
-                gains.push(bassGain);
-
-                // Harmony line
-                const harmonyOsc = audioContext.createOscillator();
-                const harmonyGain = audioContext.createGain();
-                harmonyOsc.connect(harmonyGain);
-                harmonyGain.connect(audioContext.destination);
-                harmonyOsc.type = 'sawtooth';
-                harmonyGain.gain.setValueAtTime(0.03, audioContext.currentTime);
-                oscillators.push(harmonyOsc);
-                gains.push(harmonyGain);
-
-                // Pleasant chord progression in C major
-                const progression = [
-                    { melody: 261.63, bass: 130.81, harmony: 329.63 }, // C4, C3, E4
-                    { melody: 293.66, bass: 146.83, harmony: 369.99 }, // D4, D3, F#4
-                    { melody: 329.63, bass: 164.81, harmony: 392.00 }, // E4, E3, G4
-                    { melody: 349.23, bass: 174.61, harmony: 440.00 }, // F4, F3, A4
-                    { melody: 392.00, bass: 196.00, harmony: 493.88 }, // G4, G3, B4
-                    { melody: 349.23, bass: 174.61, harmony: 440.00 }, // F4, F3, A4
-                    { melody: 329.63, bass: 164.81, harmony: 392.00 }, // E4, E3, G4
-                    { melody: 261.63, bass: 130.81, harmony: 329.63 }  // C4, C3, E4
-                ];
-
-                let chordIndex = 0;
-
-                const playProgression = () => {
-                    if (oscillators.length > 0 && audioContext) {
-                        const chord = progression[chordIndex];
-
-                        // Set frequencies for each voice
-                        melodyOsc.frequency.setValueAtTime(chord.melody, audioContext.currentTime);
-                        bassOsc.frequency.setValueAtTime(chord.bass, audioContext.currentTime);
-                        harmonyOsc.frequency.setValueAtTime(chord.harmony, audioContext.currentTime);
-
-                        chordIndex = (chordIndex + 1) % progression.length;
-                        setTimeout(playProgression, 3000); // Change chord every 3 seconds
-                    }
-                };
-
-                // Start all oscillators
-                oscillators.forEach(osc => osc.start(audioContext.currentTime));
-                backgroundMusicOscillator = oscillators; // Store reference for cleanup
-
-                playProgression();
-
-                console.log('Enhanced background music started with harmony');
-            } catch (e) {
-                console.log('Background music failed:', e);
-            }
-        }
-
-        function stopBackgroundMusic() {
-            if (backgroundMusicOscillator) {
-                try {
-                    if (Array.isArray(backgroundMusicOscillator)) {
-                        // Stop multiple oscillators
-                        backgroundMusicOscillator.forEach(osc => {
-                            try {
-                                osc.stop();
-                            } catch (e) {
-                                console.log('Error stopping oscillator:', e);
-                            }
-                        });
-                    } else {
-                        // Stop single oscillator (legacy)
-                        backgroundMusicOscillator.stop();
-                    }
-                    backgroundMusicOscillator = null;
-                    console.log('Background music stopped');
-                } catch (e) {
-                    console.log('Error stopping background music:', e);
-                }
-            }
-        }
 
         function playCorrectSound() {
             if (!audioEnabled || !audioContext) return;
@@ -789,7 +683,6 @@
                 audioContext.resume().then(() => {
                     console.log('Audio context resumed successfully');
                     audioEnabled = true;
-                    startBackgroundMusic();
                 }).catch(e => {
                     console.log('Audio resume failed:', e);
                 });
@@ -816,13 +709,11 @@
                 if (audioContext.state === 'running') {
                     audioEnabled = true;
                     console.log('Audio enabled automatically');
-                    startBackgroundMusic();
                 } else {
                     // Attempt to resume if suspended
                     audioContext.resume().then(() => {
                         audioEnabled = true;
                         console.log('Audio resumed automatically');
-                        startBackgroundMusic();
                     }).catch(() => {
                         console.log('Auto audio enable failed - user interaction required');
                         audioEnabled = false;
@@ -1027,8 +918,7 @@
             clearInterval(timer);
             clearInterval(nextQuestionTimer);
 
-            // Stop background music and play celebration sound
-            stopBackgroundMusic();
+            // Play celebration sound
             playCelebrationSound();
 
             document.getElementById('quizContent').style.display = 'none';
