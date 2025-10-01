@@ -108,7 +108,8 @@
             transition: all 0.5s ease;
             justify-content: center;
             flex: 1;
-            align-items: stretch;
+            align-items: flex-start;
+            padding-top: 40px;
         }
 
         .question-section {
@@ -119,7 +120,6 @@
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            padding-top: 40px;
         }
 
         .explanation-section {
@@ -134,12 +134,14 @@
 
         .content-wrapper.show-explanation .question-section {
             flex: 0 0 48%;
+            min-height: 450px;
         }
 
         .content-wrapper.show-explanation .explanation-section {
             flex: 0 0 48%;
             opacity: 1;
             width: auto;
+            min-height: 450px;
         }
 
         .explanation-card {
@@ -147,7 +149,7 @@
             border-radius: 12px;
             padding: 18px;
             border-left: 4px solid #667eea;
-            height: 100%;
+            min-height: 100%;
             display: flex;
             flex-direction: column;
         }
@@ -207,12 +209,12 @@
         }
 
         .question-container {
-            margin-bottom: 20px;
+            margin-bottom: 0;
             width: 100%;
             max-width: 700px;
-            min-height: 200px;
             display: flex;
             flex-direction: column;
+            flex: 1;
         }
 
         .question-counter {
@@ -249,6 +251,7 @@
             gap: 12px;
             overflow: visible;
             padding: 0 5px;
+            margin-top: auto;
         }
 
         .option {
