@@ -109,7 +109,7 @@
             transition: all 0.5s ease;
             justify-content: center;
             flex: 1;
-            align-items: center;
+            align-items: stretch;
         }
 
         .question-section {
@@ -119,6 +119,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
         }
 
         .explanation-section {
@@ -202,6 +203,7 @@
         .question-container {
             margin-bottom: 20px;
             width: 100%;
+            max-width: 700px;
         }
 
         .question-counter {
@@ -615,6 +617,12 @@
             // Reset layout
             document.getElementById('contentWrapper').classList.remove('show-explanation');
             document.querySelector('.quiz-container').classList.remove('expanded');
+
+            // Ensure question section is visible
+            const questionSection = document.querySelector('.question-section');
+            if (questionSection) {
+                questionSection.style.display = 'flex';
+            }
 
             updateProgress();
             startTimer();
