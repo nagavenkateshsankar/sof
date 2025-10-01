@@ -12,7 +12,7 @@ module.exports = defineConfig({
     baseURL: 'file://' + __dirname,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure'
+    video: 'on'  // Always record videos
   },
   projects: [
     {
