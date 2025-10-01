@@ -13,7 +13,7 @@
 
         /* Root font size that scales with viewport */
         html {
-            font-size: clamp(14px, 1.5vw, 24px); /* Responsive base font size */
+            font-size: clamp(16px, 1.2vw, 20px); /* More conservative responsive base font size */
         }
 
         body {
@@ -29,10 +29,10 @@
 
         .quiz-container {
             background: white;
-            border-radius: clamp(10px, 1.5vw, 25px);
-            box-shadow: 0 clamp(8px, 1.5vw, 25px) clamp(20px, 4vw, 60px) rgba(0, 0, 0, 0.3);
-            padding: clamp(15px, 2.5vw, 40px);
-            max-width: clamp(800px, 75vw, 2400px);
+            border-radius: clamp(10px, 1vw, 20px);
+            box-shadow: 0 clamp(8px, 1vw, 15px) clamp(20px, 3vw, 40px) rgba(0, 0, 0, 0.3);
+            padding: clamp(20px, 2vw, 30px);
+            max-width: clamp(800px, 90vw, 1200px);
             width: 100%;
             height: 85vh;
             transition: max-width 0.5s ease;
@@ -54,7 +54,7 @@
 
         .quiz-title {
             color: #333;
-            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-size: clamp(1.5rem, 2.5vw, 2rem);
             margin-bottom: 0;
             font-weight: bold;
         }
@@ -237,9 +237,9 @@
         }
 
         .question-text {
-            font-size: clamp(1.5rem, 3.5vw, 3rem);
+            font-size: clamp(1.3rem, 2.5vw, 2rem);
             color: #333;
-            margin-bottom: clamp(15px, 2vw, 30px);
+            margin-bottom: clamp(15px, 2vw, 25px);
             line-height: 1.4;
             font-weight: 500;
             display: block;
