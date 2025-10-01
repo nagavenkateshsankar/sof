@@ -500,6 +500,8 @@
         // Web Audio API for better sound generation
         let audioContext;
         let audioEnabled = false;
+        let backgroundMusicGain;
+        let backgroundMusicOscillator;
 
         function initAudio() {
             try {
@@ -533,7 +535,61 @@
             }
         }
 
-        function playAchievement() {
+        function startBackgroundMusic() {
+            if (!audioEnabled || !audioContext) return;
+
+            try {
+                // Stop existing background music if any
+                stopBackgroundMusic();
+
+                // Create a soft, ambient background melody
+                backgroundMusicOscillator = audioContext.createOscillator();
+                backgroundMusicGain = audioContext.createGain();
+
+                backgroundMusicOscillator.connect(backgroundMusicGain);
+                backgroundMusicGain.connect(audioContext.destination);
+
+                // Soft ambient frequency
+                backgroundMusicOscillator.frequency.setValueAtTime(220, audioContext.currentTime); // A3
+                backgroundMusicOscillator.type = 'sine';
+
+                // Very low volume for background
+                backgroundMusicGain.gain.setValueAtTime(0.02, audioContext.currentTime);
+
+                // Create a gentle melody pattern
+                const melody = [220, 246.94, 261.63, 293.66, 329.63]; // A3, B3, C4, D4, E4
+                let noteIndex = 0;
+
+                const playMelody = () => {
+                    if (backgroundMusicOscillator && audioContext) {
+                        backgroundMusicOscillator.frequency.setValueAtTime(melody[noteIndex], audioContext.currentTime);
+                        noteIndex = (noteIndex + 1) % melody.length;
+                        setTimeout(playMelody, 2000); // Change note every 2 seconds
+                    }
+                };
+
+                backgroundMusicOscillator.start(audioContext.currentTime);
+                playMelody();
+
+                console.log('Background music started');
+            } catch (e) {
+                console.log('Background music failed:', e);
+            }
+        }
+
+        function stopBackgroundMusic() {
+            if (backgroundMusicOscillator) {
+                try {
+                    backgroundMusicOscillator.stop();
+                    backgroundMusicOscillator = null;
+                    console.log('Background music stopped');
+                } catch (e) {
+                    console.log('Error stopping background music:', e);
+                }
+            }
+        }
+
+        function playCorrectSound() {
             if (!audioEnabled || !audioContext) return;
 
             try {
@@ -545,20 +601,133 @@
                 oscillator2.connect(gainNode);
                 gainNode.connect(audioContext.destination);
 
-                // Create a pleasant chord (C major)
+                // Bright major chord for correct answer
                 oscillator1.frequency.setValueAtTime(523, audioContext.currentTime); // C5
                 oscillator2.frequency.setValueAtTime(659, audioContext.currentTime); // E5
+
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+
+                oscillator1.start(audioContext.currentTime);
+                oscillator2.start(audioContext.currentTime);
+                oscillator1.stop(audioContext.currentTime + 0.8);
+                oscillator2.stop(audioContext.currentTime + 0.8);
+            } catch (e) {
+                console.log('Correct sound failed:', e);
+            }
+        }
+
+        function playIncorrectSound() {
+            if (!audioEnabled || !audioContext) return;
+
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Lower, dissonant sound for incorrect answer
+                oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+                oscillator.type = 'sawtooth';
 
                 gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
 
-                oscillator1.start(audioContext.currentTime);
-                oscillator2.start(audioContext.currentTime);
-                oscillator1.stop(audioContext.currentTime + 0.5);
-                oscillator2.stop(audioContext.currentTime + 0.5);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
             } catch (e) {
-                console.log('Achievement sound failed:', e);
+                console.log('Incorrect sound failed:', e);
             }
+        }
+
+        function playTransitionSound() {
+            if (!audioEnabled || !audioContext) return;
+
+            try {
+                const oscillator1 = audioContext.createOscillator();
+                const oscillator2 = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator1.connect(gainNode);
+                oscillator2.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Ascending notes for transition
+                oscillator1.frequency.setValueAtTime(392, audioContext.currentTime); // G4
+                oscillator2.frequency.setValueAtTime(523, audioContext.currentTime + 0.1); // C5
+
+                oscillator1.type = 'triangle';
+                oscillator2.type = 'triangle';
+
+                gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+
+                oscillator1.start(audioContext.currentTime);
+                oscillator2.start(audioContext.currentTime + 0.1);
+                oscillator1.stop(audioContext.currentTime + 0.2);
+                oscillator2.stop(audioContext.currentTime + 0.4);
+            } catch (e) {
+                console.log('Transition sound failed:', e);
+            }
+        }
+
+        function playWarningSound() {
+            if (!audioEnabled || !audioContext) return;
+
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Urgent warning sound
+                oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
+                oscillator.type = 'square';
+
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } catch (e) {
+                console.log('Warning sound failed:', e);
+            }
+        }
+
+        function playCelebrationSound() {
+            if (!audioEnabled || !audioContext) return;
+
+            try {
+                // Play a sequence of ascending notes
+                const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
+
+                notes.forEach((freq, index) => {
+                    setTimeout(() => {
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+
+                        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                        oscillator.type = 'triangle';
+
+                        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.5);
+                    }, index * 150);
+                });
+            } catch (e) {
+                console.log('Celebration sound failed:', e);
+            }
+        }
+
+        function playAchievement() {
+            playCorrectSound();
         }
 
         function enableAudio() {
@@ -569,6 +738,7 @@
                 audioContext.resume().then(() => {
                     console.log('Audio context resumed successfully');
                     audioEnabled = true;
+                    startBackgroundMusic();
                 }).catch(e => {
                     console.log('Audio resume failed:', e);
                 });
@@ -595,11 +765,13 @@
                 if (audioContext.state === 'running') {
                     audioEnabled = true;
                     console.log('Audio enabled automatically');
+                    startBackgroundMusic();
                 } else {
                     // Attempt to resume if suspended
                     audioContext.resume().then(() => {
                         audioEnabled = true;
                         console.log('Audio resumed automatically');
+                        startBackgroundMusic();
                     }).catch(() => {
                         console.log('Auto audio enable failed - user interaction required');
                         audioEnabled = false;
@@ -617,6 +789,11 @@
             // Clear any existing timers
             clearTimeout(autoAdvanceTimer);
             clearInterval(nextQuestionTimer);
+
+            // Play transition sound for new questions (except the first one)
+            if (currentQuestion > 0) {
+                playTransitionSound();
+            }
 
             console.log(`Loading question ${currentQuestion + 1}:`, question.question);
 
@@ -702,8 +879,16 @@
             timerElement.classList.remove('warning', 'danger');
             if (timeLeft <= 10 && timeLeft > 5) {
                 timerElement.classList.add('warning');
+                // Play warning sound when entering warning zone (only once)
+                if (timeLeft === 10) {
+                    playWarningSound();
+                }
             } else if (timeLeft <= 5) {
                 timerElement.classList.add('danger');
+                // Play urgent warning sound when entering danger zone (only once)
+                if (timeLeft === 5) {
+                    playWarningSound();
+                }
             }
         }
 
@@ -726,10 +911,18 @@
                 }
             });
 
-            // Play achievement sound when answer is revealed
+            // Play sound based on whether user got it right or wrong
             setTimeout(() => {
-                playAchievement();
+                if (userAnswers[currentQuestion] === correctIndex) {
+                    playCorrectSound();
+                } else if (userAnswers[currentQuestion] !== undefined) {
+                    playIncorrectSound();
+                } else {
+                    // No answer selected, play neutral correct sound for the right answer
+                    playCorrectSound();
+                }
             }, 300);
+
 
             // Expand container and show explanation
             const container = document.querySelector('.quiz-container');
@@ -782,6 +975,11 @@
         function showResults() {
             clearInterval(timer);
             clearInterval(nextQuestionTimer);
+
+            // Stop background music and play celebration sound
+            stopBackgroundMusic();
+            playCelebrationSound();
+
             document.getElementById('quizContent').style.display = 'none';
             document.getElementById('resultContainer').classList.add('show');
         }
